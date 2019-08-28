@@ -4,6 +4,7 @@ import isPlainObject from './utils/isPlainObject'
 
 function getUndefinedStateErrorMessage(key, action) {
   const actionType = action && action.type
+  // 你也能使用 String 函数将其他值生成或转换成字符串：
   const actionDescription =
     (actionType && `action "${String(actionType)}"`) || 'an action'
 
@@ -65,8 +66,9 @@ function getUnexpectedStateShapeWarningMessage(
 function assertReducerShape(reducers) {
   Object.keys(reducers).forEach(key => {
     const reducer = reducers[key]
+    // 第一个参数给undefined 测试state有没有默认值
     const initialState = reducer(undefined, { type: ActionTypes.INIT })
-
+// 如果没有 就报错
     if (typeof initialState === 'undefined') {
       throw new Error(
         `Reducer "${key}" returned undefined during initialization. ` +
@@ -76,7 +78,7 @@ function assertReducerShape(reducers) {
           `you can use null instead of undefined.`
       )
     }
-
+// 就算随便发一个action也不应该返回undefined
     if (
       typeof reducer(undefined, {
         type: ActionTypes.PROBE_UNKNOWN_ACTION()
@@ -115,13 +117,14 @@ export default function combineReducers(reducers) {
   const finalReducers = {}
   for (let i = 0; i < reducerKeys.length; i++) {
     const key = reducerKeys[i]
-
+// 不是生产环境 key的值不存在
     if (process.env.NODE_ENV !== 'production') {
       if (typeof reducers[key] === 'undefined') {
         warning(`No reducer provided for key "${key}"`)
       }
     }
 
+    // 把是函数的reducer给finalReducers
     if (typeof reducers[key] === 'function') {
       finalReducers[key] = reducers[key]
     }
@@ -134,7 +137,7 @@ export default function combineReducers(reducers) {
   if (process.env.NODE_ENV !== 'production') {
     unexpectedKeyCache = {}
   }
-
+// 检测和存放reducer形态错误
   let shapeAssertionError
   try {
     assertReducerShape(finalReducers)
@@ -142,11 +145,13 @@ export default function combineReducers(reducers) {
     shapeAssertionError = e
   }
 
+  // 返回一个函数
   return function combination(state = {}, action) {
+    // reducer形态错误直接抛
     if (shapeAssertionError) {
       throw shapeAssertionError
     }
-
+// 非生产环境 有警告直接抛
     if (process.env.NODE_ENV !== 'production') {
       const warningMessage = getUnexpectedStateShapeWarningMessage(
         state,
@@ -154,6 +159,7 @@ export default function combineReducers(reducers) {
         action,
         unexpectedKeyCache
       )
+      
       if (warningMessage) {
         warning(warningMessage)
       }
@@ -166,13 +172,17 @@ export default function combineReducers(reducers) {
       const reducer = finalReducers[key]
       const previousStateForKey = state[key]
       const nextStateForKey = reducer(previousStateForKey, action)
+      // 如果下一个reducer的nextState的值为undefined 就报错
       if (typeof nextStateForKey === 'undefined') {
         const errorMessage = getUndefinedStateErrorMessage(key, action)
         throw new Error(errorMessage)
       }
+      // 否则更新nextState
       nextState[key] = nextStateForKey
+      // 更新的 对应reducer的state前后如果不相等则hasChanged置为true 更新nextState
       hasChanged = hasChanged || nextStateForKey !== previousStateForKey
     }
+    // 或者修改前后state和reducer键的数量不一样 则更新nextState
     hasChanged =
       hasChanged || finalReducerKeys.length !== Object.keys(state).length
     return hasChanged ? nextState : state

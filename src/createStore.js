@@ -28,7 +28,27 @@ import isPlainObject from './utils/isPlainObject'
  * @returns {Store} A Redux store that lets you read the state, dispatch actions
  * and subscribe to changes.
  */
+
+// export default combineReducers({
+//   auth: authReducer,
+//   errors: errorReducer,
+//   profile: profileReducer,
+//   post: postReducer
+// });
+
+// import rootReducer from "./reducers";
+
+// const middleware = [thunk];
+// const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+// const initialState = {};
+// const store = createStore(
+//   rootReducer,
+//   initialState,
+//   composeEnhancers(applyMiddleware(...middleware))
+// );
+
 export default function createStore(reducer, preloadedState, enhancer) {
+  // preloadedState传了函数 或者多传了一个参数 报错
   if (
     (typeof preloadedState === 'function' && typeof enhancer === 'function') ||
     (typeof enhancer === 'function' && typeof arguments[3] === 'function')
@@ -39,20 +59,20 @@ export default function createStore(reducer, preloadedState, enhancer) {
         'together to a single function.'
     )
   }
-
+// 如果第二个参数为函数则把这个函数赋值给enhancer state置为undefined
   if (typeof preloadedState === 'function' && typeof enhancer === 'undefined') {
     enhancer = preloadedState
     preloadedState = undefined
   }
-
+// enhancer不是个函数报错
   if (typeof enhancer !== 'undefined') {
     if (typeof enhancer !== 'function') {
       throw new Error('Expected the enhancer to be a function.')
     }
-
+// enhancer就是 applyMiddleware返回的函数  / compose的返回值
     return enhancer(createStore)(reducer, preloadedState)
   }
-
+// reducer不是函数就报错 /一般来说是combineReducers返回的combination函数
   if (typeof reducer !== 'function') {
     throw new Error('Expected the reducer to be a function.')
   }

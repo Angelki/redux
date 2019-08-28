@@ -5,6 +5,10 @@
  * Do not reference these action types directly in your code.
  */
 
+//  随机获得一个[0, 1)之间的双精度浮点数
+//  转成36进制字符串(随机26个字母和数字)
+// 从index = 7开始截取后面的几位
+//  用.隔开
 const randomString = () =>
   Math.random()
     .toString(36)

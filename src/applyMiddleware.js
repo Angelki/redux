@@ -17,6 +17,8 @@ import compose from './compose'
  * @returns {Function} A store enhancer applying the middleware.
  */
 export default function applyMiddleware(...middlewares) {
+  // 返回一个参数为createStore的函数  这个函数又返回一个函数
+  //  这个又返回的函数返回一个包含store和dispatch对象
   return createStore => (...args) => {
     const store = createStore(...args)
     let dispatch = () => {
@@ -30,6 +32,8 @@ export default function applyMiddleware(...middlewares) {
       getState: store.getState,
       dispatch: (...args) => dispatch(...args)
     }
+    // 执行所有的中间件将执行结果返回给chain
+    // compose所有的中间件和原始的dispatch
     const chain = middlewares.map(middleware => middleware(middlewareAPI))
     dispatch = compose(...chain)(store.dispatch)
 
