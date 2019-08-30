@@ -69,7 +69,9 @@ export default function createStore(reducer, preloadedState, enhancer) {
     if (typeof enhancer !== 'function') {
       throw new Error('Expected the enhancer to be a function.')
     }
+    //  如果是个函数
 // enhancer就是 applyMiddleware返回的函数  / compose的返回值
+// 这个函数返回一个参数为createStore的函数  这个函数又返回一个返回一个包含store和dispatch对象的函数
     return enhancer(createStore)(reducer, preloadedState)
   }
 // reducer不是函数就报错 /一般来说是combineReducers返回的combination函数
@@ -222,17 +224,19 @@ export default function createStore(reducer, preloadedState, enhancer) {
 
     try {
       isDispatching = true
+      // dispatch就是调用当前的reducer 返回当前的state
       currentState = currentReducer(currentState, action)
     } finally {
       isDispatching = false
     }
 
+    // 循环调用所有的监听器 监听器是通过subscribe(listener) 传入的 / outerSubscribe
     const listeners = (currentListeners = nextListeners)
     for (let i = 0; i < listeners.length; i++) {
       const listener = listeners[i]
       listener()
     }
-
+    // 返回传入的action
     return action
   }
 
@@ -246,6 +250,7 @@ export default function createStore(reducer, preloadedState, enhancer) {
    * @param {Function} nextReducer The reducer for the store to use instead.
    * @returns {void}
    */
+  // 一个高级api 用来替换当前reducer来更新state
   function replaceReducer(nextReducer) {
     if (typeof nextReducer !== 'function') {
       throw new Error('Expected the nextReducer to be a function.')

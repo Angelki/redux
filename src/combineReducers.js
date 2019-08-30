@@ -145,7 +145,7 @@ export default function combineReducers(reducers) {
     shapeAssertionError = e
   }
 
-  // 返回一个函数
+  // 返回一个参数为state和action的函数 当我们调用reducer函数的时候就是在执行这个函数
   return function combination(state = {}, action) {
     // reducer形态错误直接抛
     if (shapeAssertionError) {
@@ -168,8 +168,11 @@ export default function combineReducers(reducers) {
     let hasChanged = false
     const nextState = {}
     for (let i = 0; i < finalReducerKeys.length; i++) {
+      // key为每个reducer的名字
       const key = finalReducerKeys[i]
+      // 循环每一个合法的reducer
       const reducer = finalReducers[key]
+      // 在传入的state中找到与某次reducer对应的值
       const previousStateForKey = state[key]
       const nextStateForKey = reducer(previousStateForKey, action)
       // 如果下一个reducer的nextState的值为undefined 就报错

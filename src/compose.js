@@ -17,6 +17,6 @@ export default function compose(...funcs) {
   if (funcs.length === 1) {
     return funcs[0]
   }
-
+// 所以执行顺序是从右到左
   return funcs.reduce((a, b) => (...args) => a(b(...args)))
 }
